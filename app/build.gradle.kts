@@ -14,9 +14,9 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
-    implementation("com.google.guava:guava:32.1.1-jre")
+    implementation("com.google.guava:guava:32.1.3-jre")
     implementation("com.google.code.gson:gson:2.10.1")
-    implementation("org.slf4j:slf4j-simple:2.0.7")
+    implementation("org.slf4j:slf4j-simple:2.0.9")
     implementation("io.javalin:javalin:6.0.0-beta.2")
     implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
     implementation("org.spongepowered:configurate-gson:4.2.0-SNAPSHOT")
