@@ -1,0 +1,8 @@
+.gradle
+.idea
+**/build
+release.sh
+bin
+**/run/
+# Ignore Gradle build output directory
+build
