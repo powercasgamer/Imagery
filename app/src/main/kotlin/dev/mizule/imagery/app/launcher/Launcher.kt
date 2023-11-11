@@ -44,7 +44,6 @@ fun main(args: Array<String>) {
 
     parser.parse(args)
 
-<<<<<<< HEAD
     val configPath = Path(path)
     val configLoader = HoconConfigurationLoader.builder()
         .path(configPath)
@@ -70,11 +69,4 @@ fun main(args: Array<String>) {
     Runtime.getRuntime().addShutdownHook(Thread(app::stop))
 
     app.start()
-=======
-    Runtime.getRuntime().addShutdownHook(
-        Thread {
-            app.disable()
-        },
-    )
->>>>>>> 2e25971 (chore(spotless): use ktlint)
 }

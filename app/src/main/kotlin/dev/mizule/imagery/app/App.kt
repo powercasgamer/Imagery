@@ -41,7 +41,10 @@ import org.spongepowered.configurate.jackson.JacksonConfigurationLoader
 import org.spongepowered.configurate.kotlin.objectMapperFactory
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
-import kotlin.io.path.*
+import kotlin.io.path.Path
+import kotlin.io.path.createDirectories
+import kotlin.io.path.inputStream
+import kotlin.io.path.outputStream
 
 private val logger = KotlinLogging.logger {}
 
@@ -100,7 +103,7 @@ class App(private val config: Config) {
             System.currentTimeMillis(),
             file.filename(),
             file.extension(),
-            MimeTypes.getDefaultMimeByExtension(file.extension())
+            MimeTypes.getDefaultMimeByExtension(file.extension()),
         )
 
         dataNode.node(uploadedFile.id).set(uploadedFile)
