@@ -1,5 +1,5 @@
 plugins {
-    id("org.jetbrains.kotlin.jvm") version "1.9.10"
+    id("org.jetbrains.kotlin.jvm") version "1.9.20"
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("net.kyori.indra") version "3.1.3"
     application
