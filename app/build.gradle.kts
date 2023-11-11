@@ -1,5 +1,6 @@
 plugins {
     id("org.jetbrains.kotlin.jvm") version "1.9.20"
+    `java-library`
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("net.kyori.indra") version "3.1.3"
     application
@@ -20,6 +21,7 @@ dependencies {
     implementation("io.javalin:javalin:6.0.0-beta.2")
     implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
     implementation("org.spongepowered:configurate-gson:4.2.0-SNAPSHOT")
+    implementation("org.spongepowered:configurate-hocon:4.2.0-SNAPSHOT")
     implementation("org.spongepowered:configurate-extra-kotlin:4.2.0-SNAPSHOT")
 }
 
@@ -28,6 +30,7 @@ indra {
         target(17)
         minimumToolchain(17)
     }
+    mitLicense()
 }
 
 application {

@@ -8,4 +8,8 @@ fun main() {
 
     app.load()
     app.enable()
+
+    Runtime.getRuntime().addShutdownHook(Thread {
+        app.disable()
+    })
 }

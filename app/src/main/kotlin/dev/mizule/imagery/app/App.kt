@@ -3,6 +3,7 @@ package dev.mizule.imagery.app
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import dev.mizule.imagery.app.config.Config
 import dev.mizule.imagery.app.model.UploadedFile
 import io.javalin.Javalin
 import io.javalin.http.ContentType
@@ -10,8 +11,10 @@ import io.javalin.http.HttpStatus
 import io.javalin.json.JavalinGson
 import org.eclipse.jetty.http.MimeTypes
 import org.spongepowered.configurate.BasicConfigurationNode
+import org.spongepowered.configurate.CommentedConfigurationNode
 import org.spongepowered.configurate.ConfigurateException
 import org.spongepowered.configurate.gson.GsonConfigurationLoader
+import org.spongepowered.configurate.hocon.HoconConfigurationLoader
 import java.io.FileOutputStream
 import java.nio.file.Files
 import java.nio.file.Path
@@ -21,14 +24,14 @@ import kotlin.io.path.exists
 
 class App {
     private val gson = Gson()
-    private lateinit var config: BasicConfigurationNode
-    private lateinit var loader: GsonConfigurationLoader
+    private lateinit var config: Config
+    private lateinit var configNode: CommentedConfigurationNode
+    private lateinit var configLoader: HoconConfigurationLoader
+    private lateinit var dataConfig: BasicConfigurationNode
+    private lateinit var dataLoader: GsonConfigurationLoader
     private val javalin: Javalin by lazy {
         Javalin.create {
             it.jsonMapper(JavalinGson(gson))
-            it.contextResolver.ip = { ctx ->
-                ctx.header("CF-Connecting-IP")?: ctx.req().remoteAddr
-            }
             it.router.ignoreTrailingSlashes = true
         }
     }
@@ -41,16 +44,10 @@ class App {
 
     fun load() {
         initializeStorage()
+        initializeConfigs()
 
-        this.loader = GsonConfigurationLoader.builder()
-            .path(path.resolve("files.json"))
-            .build()
-
-        try {
-            this.config = loader.load()
-            loader.save(this.config)
-        } catch (e: ConfigurateException) {
-            throw RuntimeException(e)
+        javalin.unsafeConfig().contextResolver.ip = { ctx ->
+            ctx.header("CF-Connecting-IP") ?: ctx.req().remoteAddr
         }
 
         configureEndpoints()
@@ -60,11 +57,43 @@ class App {
         if (!storage.exists()) {
             Files.createDirectories(storage)
         }
+
+        // cache?
+    }
+
+    private fun initializeConfigs() {
+        this.dataLoader = GsonConfigurationLoader.builder()
+            .path(path.resolve("files.json"))
+            .build()
+        this.configLoader = HoconConfigurationLoader.builder()
+            .path(path.resolve("config.conf"))
+            .defaultOptions {
+                it.shouldCopyDefaults(true)
+            }
+            .build()
+
+        try {
+            this.dataConfig = dataLoader.load()
+            this.configNode = configLoader.load()
+            dataLoader.save(this.dataConfig)
+            configLoader.save(this.configNode)
+            this.config = configNode.get(Config::class.java) ?: return
+        } catch (e: ConfigurateException) {
+            throw RuntimeException(e)
+        }
     }
 
     private fun configureEndpoints() {
         javalin.beforeMatched { ctx ->
-            println(String.format("Received %s request from: %s:%s for %s", ctx.method(), ctx.ip(), ctx.port(), ctx.fullUrl()));
+            println(
+                String.format(
+                    "Received %s request from: %s:%s for %s",
+                    ctx.method(),
+                    ctx.ip(),
+                    ctx.port(),
+                    ctx.fullUrl()
+                )
+            )
         }
         javalin.post("/upload") { ctx ->
             handleFileUpload(ctx)
@@ -77,7 +106,7 @@ class App {
 
     private fun handleFileUpload(ctx: io.javalin.http.Context) {
         ctx.uploadedFiles("file").first().also { file ->
-            val fileName = getRandomString(8) + file.extension()
+            val fileName = getRandomString() + file.extension()
             val filePath = storage.resolve(fileName)
             Files.createFile(filePath)
             FileOutputStream(filePath.toFile()).use {
@@ -91,9 +120,9 @@ class App {
                 file.extension(),
                 MimeTypes.getDefaultMimeByExtension(file.extension())
             )
-            config.node(uploadedFile.id).set(uploadedFile)
+            dataConfig.node(uploadedFile.id).set(uploadedFile)
             try {
-                loader.save(this.config)
+                dataLoader.save(this.dataConfig)
             } catch (e: ConfigurateException) {
                 throw RuntimeException(e)
             }
@@ -120,14 +149,14 @@ class App {
     }
 
     fun enable() {
-        javalin.start(5462)
+        javalin.start(this.config.port)
     }
 
     fun disable() {
-        // Add any necessary cleanup logic here
+        println("Shutting down...")
     }
 
-    private fun getRandomString(length: Int): String {
+    private fun getRandomString(length: Int = 8): String {
         val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
         return (1..length)
             .map { allowedChars.random() }
