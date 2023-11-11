@@ -1,7 +1,14 @@
+import com.diffplug.gradle.spotless.FormatExtension
+import net.kyori.indra.licenser.spotless.HeaderFormat
+import java.util.*
+
 plugins {
     id("org.jetbrains.kotlin.jvm") version "1.9.20"
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("net.kyori.indra") version "3.1.3"
+    id("net.kyori.indra.licenser.spotless") version "3.1.3"
+    id("net.kyori.indra.git") version "3.1.3"
+    id("org.jetbrains.gradle.plugin.idea-ext") version "1.1.7"
     `java-library`
     application
 }
@@ -34,6 +41,45 @@ indra {
     mitLicense()
 }
 
+spotless {
+    fun FormatExtension.applyCommon() {
+        trimTrailingWhitespace()
+        endWithNewline()
+        encoding("UTF-8")
+        toggleOffOn()
+    }
+    java {
+        importOrderFile(rootProject.file(".spotless/mizule.importorder"))
+        removeUnusedImports()
+        formatAnnotations()
+        applyCommon()
+        target("*/src/*/java/**/*.java")
+    }
+    kotlinGradle {
+        applyCommon()
+    }
+    kotlin {
+        applyCommon()
+    }
+}
+
+indraSpotlessLicenser {
+    headerFormat(HeaderFormat.starSlash())
+    licenseHeaderFile(rootProject.projectDir.resolve("HEADER"))
+
+    val currentYear = Calendar.getInstance().apply {
+        time = Date()
+    }.get(Calendar.YEAR)
+    val createdYear = providers.gradleProperty("createdYear").map { it.toInt() }.getOrElse(currentYear)
+    val year = if (createdYear == currentYear) createdYear.toString() else "$createdYear-$currentYear"
+
+    property("name", providers.gradleProperty("projectName").getOrElse("template"))
+    property("year", year)
+    property("description", project.description ?: "A template project")
+    property("author", providers.gradleProperty("projectAuthor").getOrElse("template"))
+
+}
+
 application {
     mainClass.set("dev.mizule.imagery.app.launcher.Launcher")
 }
@@ -45,5 +91,12 @@ tasks {
 
     runShadow {
         workingDir = file("run").also(File::mkdirs)
+    }
+}
+
+idea {
+    module {
+        isDownloadJavadoc = true
+        isDownloadSources = true
     }
 }
