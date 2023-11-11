@@ -1,3 +1,3 @@
 # imagery
 
-A WIPShareX file server
+A WIP ShareX file server.
