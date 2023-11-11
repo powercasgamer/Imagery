@@ -32,6 +32,7 @@ data class Config(
     @Comment("The port to start the application on.")
     val port: Int = 8052,
 
+<<<<<<< HEAD
     @Comment("The base URL that this will be on, without trailing slashes.")
     val baseUrl: String = "https://i.mizule.dev",
 
@@ -40,4 +41,8 @@ data class Config(
 
     @Comment("The path to the uploaded file storage directory.")
     val storagePath: String = "./storage"
+=======
+    @Comment("The domain that this will be on")
+    val domain: String = "https://example.com",
+>>>>>>> 2e25971 (chore(spotless): use ktlint)
 )

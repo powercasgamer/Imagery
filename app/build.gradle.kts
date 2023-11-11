@@ -57,9 +57,11 @@ spotless {
     }
     kotlinGradle {
         applyCommon()
+        ktlint("0.50.0")
     }
     kotlin {
         applyCommon()
+        ktlint("0.50.0")
     }
 }
 
@@ -77,7 +79,6 @@ indraSpotlessLicenser {
     property("year", year)
     property("description", project.description ?: "A template project")
     property("author", providers.gradleProperty("projectAuthor").getOrElse("template"))
-
 }
 
 application {
