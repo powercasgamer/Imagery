@@ -32,6 +32,7 @@ data class UploadedFile(
     val user: String,
     val uploadedDate: Long,
     val fileName: String,
+    val originalFileName: String,
     val extension: String,
     val mimeType: String,
 )

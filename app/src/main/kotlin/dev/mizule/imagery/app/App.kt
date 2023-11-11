@@ -91,22 +91,24 @@ class App(private val config: Config) {
             return
         }
 
-        val fileName = getRandomString() + file.extension()
+        val id = getRandomString()
+        val fileName = id + file.extension()
         val filePath = storageDir.resolve(fileName)
         filePath.outputStream().use {
             file.content().copyTo(it)
         }
 
         val uploadedFile = UploadedFile(
-            fileName,
+            id,
             "user",
             System.currentTimeMillis(),
+            fileName,
             file.filename(),
             file.extension(),
             MimeTypes.getDefaultMimeByExtension(file.extension()),
         )
 
-        dataNode.node(uploadedFile.id).set(uploadedFile)
+        dataNode.node(id).set(uploadedFile)
         dataLoader.save(dataNode) // TODO: probably shouldn't be done during the http request
 
         cache.put(fileName, FileCacheEntry(uploadedFile, filePath))
@@ -114,12 +116,21 @@ class App(private val config: Config) {
     }
 
     private fun serveUploadedFile(ctx: Context) {
-        cache.getIfPresent(ctx.pathParam("id"))
-            ?.also { (uploadedFile, path) ->
-                ctx.result(path.inputStream())
-                    .contentType(ContentType.getContentTypeByExtension(uploadedFile.extension) ?: ContentType.IMAGE_PNG)
+        val id = ctx.pathParam("id")
+        cache.get(id) {
+            val node = dataNode.node(id)
+            if (node != null && !node.virtual()) {
+                val uploadedNode = node.get(UploadedFile::class.java)!!
+                FileCacheEntry(uploadedNode, storageDir.resolve(uploadedNode.fileName))
+            } else {
+                // cry
+                ctx.result("This image does not exists").status(HttpStatus.NOT_FOUND)
+                null
             }
-            ?: ctx.status(HttpStatus.NOT_FOUND)
+        }?.also { (uploadedFile, path) ->
+            ctx.result(path.inputStream())
+                .contentType(ContentType.getContentTypeByExtension(uploadedFile.extension) ?: ContentType.IMAGE_PNG)
+        }?: ctx.result("This image does not exists").status(HttpStatus.NOT_FOUND)
     }
 
     fun start() {
