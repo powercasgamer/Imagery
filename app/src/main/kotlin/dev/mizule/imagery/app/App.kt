@@ -29,15 +29,18 @@ import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
 import dev.mizule.imagery.app.auth.AuthHandler
 import dev.mizule.imagery.app.config.Config
+import dev.mizule.imagery.app.exceptions.FileNotFoundResponse
 import dev.mizule.imagery.app.model.ImageLookupResult
 import dev.mizule.imagery.app.model.Roles
 import dev.mizule.imagery.app.model.UploadedFile
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.javalin.Javalin
+import io.javalin.http.BadRequestResponse
 import io.javalin.http.ContentType
 import io.javalin.http.Context
-import io.javalin.http.HttpStatus
+import io.javalin.http.ForbiddenResponse
 import io.javalin.json.JavalinJackson
+import io.javalin.util.ConcurrencyUtil
 import org.eclipse.jetty.http.MimeTypes
 import org.spongepowered.configurate.jackson.JacksonConfigurationLoader
 import org.spongepowered.configurate.kotlin.objectMapperFactory
@@ -51,6 +54,7 @@ import kotlin.io.path.outputStream
 private val logger = KotlinLogging.logger {}
 
 class App(private val config: Config, usersConfigOption: String) {
+    private val scheduler = ConcurrencyUtil.executorService("Imagery Scheduler", true)
     private val storageDir = Path(config.storagePath)
     private val dataLoader = JacksonConfigurationLoader.builder()
         .path(Path(config.indexPath))
@@ -87,18 +91,14 @@ class App(private val config: Config, usersConfigOption: String) {
         }
         javalin.get("/{id}", ::serveUploadedFile)
         if (authHandler.usersConfig.users.isEmpty()) {
-            authHandler.createUser("powercas_gamer")
+            authHandler.createUser("user")
         }
         javalin.beforeMatched("/upload") { ctx ->
             if (ctx.routeRoles().contains(Roles.PRIVATE)) {
                 // check auth header
-                val token = ctx.header("Authorization") ?: throw io.javalin.http.ForbiddenResponse()
-                logger.info { "Someone tried to use the following token: $token" }
+                val token = ctx.header("Authorization") ?: throw ForbiddenResponse()
                 if (!authHandler.isAuthorized(token)) {
-                    logger.info { "Token: $token Unauthorized" }
-                    throw io.javalin.http.ForbiddenResponse()
-                } else {
-                    logger.info { "Token: $token Authorized" }
+                    throw ForbiddenResponse()
                 }
             }
         }
@@ -106,11 +106,7 @@ class App(private val config: Config, usersConfigOption: String) {
     }
 
     private fun handleFileUpload(ctx: Context) {
-        val file = ctx.uploadedFiles("file").firstOrNull()
-        if (file == null) {
-            ctx.status(HttpStatus.BAD_REQUEST)
-            return
-        }
+        val file = ctx.uploadedFiles("file").firstOrNull() ?: throw BadRequestResponse()
 
         val id = getRandomString()
         val fileName = id + file.extension()
@@ -118,7 +114,7 @@ class App(private val config: Config, usersConfigOption: String) {
         filePath.outputStream().use {
             file.content().copyTo(it)
         }
-        val token = ctx.header("Authorization") ?: throw io.javalin.http.ForbiddenResponse()
+        val token = ctx.header("Authorization") ?: throw ForbiddenResponse()
 
         val uploadedFile = UploadedFile(
             id,
@@ -130,8 +126,10 @@ class App(private val config: Config, usersConfigOption: String) {
             MimeTypes.getDefaultMimeByExtension(file.extension()),
         )
 
-        dataNode.node(id).set(uploadedFile)
-        dataLoader.save(dataNode) // TODO: probably shouldn't be done during the http request
+        scheduler.execute {
+            dataNode.node(id).set(uploadedFile)
+            dataLoader.save(dataNode) // TODO: probably shouldn't be done during the http request
+        }
 
         cache.put(fileName, FileCacheEntry(uploadedFile, filePath))
         ctx.json(mapOf("data" to ImageLookupResult("${config.baseUrl}/$fileName")))
@@ -146,13 +144,12 @@ class App(private val config: Config, usersConfigOption: String) {
                 FileCacheEntry(uploadedNode, storageDir.resolve(uploadedNode.fileName))
             } else {
                 // cry
-                ctx.result("This image does not exists").status(HttpStatus.NOT_FOUND)
-                null
+                throw FileNotFoundResponse()
             }
         }?.also { (uploadedFile, path) ->
             ctx.result(path.inputStream())
                 .contentType(ContentType.getContentTypeByExtension(uploadedFile.extension) ?: ContentType.IMAGE_PNG)
-        } ?: ctx.result("This image does not exists").status(HttpStatus.NOT_FOUND)
+        } ?: throw FileNotFoundResponse()
     }
 
     fun start() {

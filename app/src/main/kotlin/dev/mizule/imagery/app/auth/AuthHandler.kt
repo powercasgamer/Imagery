@@ -1,5 +1,6 @@
 package dev.mizule.imagery.app.auth
 
+import dev.mizule.imagery.app.config.UserConfig
 import org.spongepowered.configurate.jackson.JacksonConfigurationLoader
 import org.spongepowered.configurate.kotlin.extensions.get
 import org.spongepowered.configurate.kotlin.objectMapperFactory
