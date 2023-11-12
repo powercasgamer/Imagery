@@ -27,13 +27,11 @@
 package dev.mizule.imagery.app.launcher
 
 import dev.mizule.imagery.app.App
-import dev.mizule.imagery.app.auth.UserConfig
 import dev.mizule.imagery.app.config.Config
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.default
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader
-import org.spongepowered.configurate.jackson.JacksonConfigurationLoader
 import org.spongepowered.configurate.kotlin.extensions.get
 import org.spongepowered.configurate.kotlin.objectMapperFactory
 import kotlin.io.path.Path

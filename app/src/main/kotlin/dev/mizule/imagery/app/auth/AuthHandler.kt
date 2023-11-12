@@ -5,7 +5,6 @@ import org.spongepowered.configurate.kotlin.extensions.get
 import org.spongepowered.configurate.kotlin.objectMapperFactory
 import java.security.SecureRandom
 import java.util.Base64
-import java.util.HashMap
 import kotlin.io.path.Path
 import kotlin.io.path.exists
 
@@ -46,7 +45,7 @@ class AuthHandler(userConfigPath: String) {
     fun createUser(name: String): User {
         val secret = ByteArray(48)
         SecureRandom().nextBytes(secret)
-        return createUser(name, Base64.getEncoder().encodeToString(secret));
+        return createUser(name, Base64.getEncoder().encodeToString(secret))
     }
 
     fun isAuthorized(token: String): Boolean {

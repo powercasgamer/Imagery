@@ -28,7 +28,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
 import dev.mizule.imagery.app.auth.AuthHandler
-import dev.mizule.imagery.app.auth.UserConfig
 import dev.mizule.imagery.app.config.Config
 import dev.mizule.imagery.app.model.ImageLookupResult
 import dev.mizule.imagery.app.model.Roles
@@ -100,9 +99,7 @@ class App(private val config: Config, usersConfigOption: String) {
                     throw io.javalin.http.ForbiddenResponse()
                 } else {
                     logger.info { "Token: $token Authorized" }
-
                 }
-
             }
         }
         javalin.post("/upload", ::handleFileUpload, Roles.PRIVATE)
@@ -122,7 +119,6 @@ class App(private val config: Config, usersConfigOption: String) {
             file.content().copyTo(it)
         }
         val token = ctx.header("Authorization") ?: throw io.javalin.http.ForbiddenResponse()
-
 
         val uploadedFile = UploadedFile(
             id,
