@@ -27,8 +27,11 @@ package dev.mizule.imagery.app
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
+import dev.mizule.imagery.app.auth.AuthHandler
+import dev.mizule.imagery.app.auth.UserConfig
 import dev.mizule.imagery.app.config.Config
 import dev.mizule.imagery.app.model.ImageLookupResult
+import dev.mizule.imagery.app.model.Roles
 import dev.mizule.imagery.app.model.UploadedFile
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.javalin.Javalin
@@ -48,19 +51,21 @@ import kotlin.io.path.outputStream
 
 private val logger = KotlinLogging.logger {}
 
-class App(private val config: Config) {
+class App(private val config: Config, usersConfigOption: String) {
     private val storageDir = Path(config.storagePath)
     private val dataLoader = JacksonConfigurationLoader.builder()
         .path(Path(config.indexPath))
         .defaultOptions { options ->
+            options.shouldCopyDefaults(true)
             options.serializers { builder ->
                 builder.registerAnnotatedObjects(objectMapperFactory())
             }
         }
         .build()
+    private val authHandler = AuthHandler(usersConfigOption)
 
     private val dataNode = dataLoader.load()
-    private val cache: Cache<String, FileCacheEntry> = Caffeine.newBuilder()
+    private val cache: Cache<String, FileCacheEntry> = Caffeine.newBuilder() // This is really not needed, but, yes.
         .expireAfterWrite(15, TimeUnit.MINUTES)
         .expireAfterAccess(10, TimeUnit.MINUTES)
         .build()
@@ -69,6 +74,7 @@ class App(private val config: Config) {
         it.jsonMapper(JavalinJackson(MAPPER))
         it.showJavalinBanner = false
         it.router.ignoreTrailingSlashes = true
+        it.useVirtualThreads = true
         it.contextResolver.ip = { ctx ->
             ctx.header("CF-Connecting-IP") ?: ctx.req().remoteAddr
         }
@@ -81,7 +87,25 @@ class App(private val config: Config) {
             logger.info { "Received ${ctx.method()} request from: ${ctx.ip()}:${ctx.port()} for ${ctx.fullUrl()}" }
         }
         javalin.get("/{id}", ::serveUploadedFile)
-        javalin.post("/upload", ::handleFileUpload)
+        if (authHandler.usersConfig.users.isEmpty()) {
+            authHandler.createUser("powercas_gamer")
+        }
+        javalin.beforeMatched("/upload") { ctx ->
+            if (ctx.routeRoles().contains(Roles.PRIVATE)) {
+                // check auth header
+                val token = ctx.header("Authorization") ?: throw io.javalin.http.ForbiddenResponse()
+                logger.info { "Someone tried to use the following token: $token" }
+                if (!authHandler.isAuthorized(token)) {
+                    logger.info { "Token: $token Unauthorized" }
+                    throw io.javalin.http.ForbiddenResponse()
+                } else {
+                    logger.info { "Token: $token Authorized" }
+
+                }
+
+            }
+        }
+        javalin.post("/upload", ::handleFileUpload, Roles.PRIVATE)
     }
 
     private fun handleFileUpload(ctx: Context) {
@@ -97,10 +121,12 @@ class App(private val config: Config) {
         filePath.outputStream().use {
             file.content().copyTo(it)
         }
+        val token = ctx.header("Authorization") ?: throw io.javalin.http.ForbiddenResponse()
+
 
         val uploadedFile = UploadedFile(
             id,
-            "user",
+            authHandler.getUserByToken(token)?.username ?: "Unknown",
             System.currentTimeMillis(),
             fileName,
             file.filename(),
@@ -130,7 +156,7 @@ class App(private val config: Config) {
         }?.also { (uploadedFile, path) ->
             ctx.result(path.inputStream())
                 .contentType(ContentType.getContentTypeByExtension(uploadedFile.extension) ?: ContentType.IMAGE_PNG)
-        }?: ctx.result("This image does not exists").status(HttpStatus.NOT_FOUND)
+        } ?: ctx.result("This image does not exists").status(HttpStatus.NOT_FOUND)
     }
 
     fun start() {
@@ -146,7 +172,7 @@ class App(private val config: Config) {
         private val MAPPER = jacksonObjectMapper()
         private val ALLOWED_CHARS = ('A'..'Z') + ('a'..'z') + ('0'..'9')
 
-        private fun getRandomString(length: Int = 8): String =
+        fun getRandomString(length: Int = 8): String =
             generateSequence(ALLOWED_CHARS::random).take(length).joinToString("")
     }
 

@@ -24,6 +24,7 @@
  */
 package dev.mizule.imagery.app.config
 
+import dev.mizule.imagery.app.App
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import org.spongepowered.configurate.objectmapping.meta.Comment
 
