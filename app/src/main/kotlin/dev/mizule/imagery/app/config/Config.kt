@@ -40,4 +40,17 @@ data class Config(
 
     @Comment("The path to the uploaded file storage directory.")
     val storagePath: String = "./storage",
+
+    @Comment("The length of the random generated path.")
+    val pathLength: Int = 8,
+
+    @Comment("""
+Any kind of proxy services change real ip.
+The origin ip should be available in one of the headers.
+Nginx: X-Forwarded-For
+Cloudflare: CF-Connecting-IP
+Popular: X-Real-IP
+    """,
+    )
+    val addressHeader: String = "CF-Connecting-IP",
 )

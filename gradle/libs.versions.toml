@@ -1,0 +1,23 @@
+[plugins]
+
+[libraries]
+# build-logic stuff
+blossom = { module = "net.kyori:blossom", version.ref = "blossom" }
+indra-common = { module = "net.kyori:indra-common", version.ref = "indra" }
+indra-crossdoc = { module = "net.kyori:indra-crossdoc", version.ref = "indra" }
+indra-spotless = { module = "net.kyori:indra-licenser-spotless", version.ref = "indra" }
+indra-git = { module = "net.kyori:indra-git", version.ref = "indra" }
+shadow = { module = "com.github.johnrengelman:shadow", version.ref = "shadow" }
+kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+kotlin-std = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
+idea-gradle = { module = "gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext", version.ref = "idea-gradle" }
+gremlin-gradle = { module = "xyz.jpenilla:gremlin-gradle", version.ref = "gremlin" }
+gremlin-runtime = { module = "xyz.jpenilla:gremlin-runtime", version.ref = "gremlin" }
+
+[versions]
+indra = "3.1.3"
+blossom = "2.1.0"
+shadow = "8.1.1"
+kotlin = "1.9.20"
+gremlin = "0.0.3"
+idea-gradle = "1.1.7"
