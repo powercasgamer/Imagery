@@ -21,6 +21,7 @@ indra {
         minimumToolchain(17)
         target(17)
     }
+    mitLicense()
 
     publishSnapshotsTo("mizule", "https://repo.mizule.dev/snapshots")
     publishReleasesTo("mizule", "https://repo.mizule.dev/releases")

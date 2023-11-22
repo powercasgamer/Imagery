@@ -78,6 +78,7 @@ class App(val config: Config, usersConfigOption: String) {
         it.showJavalinBanner = false
         it.router.ignoreTrailingSlashes = true
         it.useVirtualThreads = true
+        it.http.brotliAndGzipCompression()
         it.contextResolver.ip = { ctx ->
             ctx.header(config.addressHeader) ?: ctx.req().remoteAddr
         }

@@ -44,7 +44,8 @@ data class Config(
     @Comment("The length of the random generated path.")
     val pathLength: Int = 8,
 
-    @Comment("""
+    @Comment(
+        """
 Any kind of proxy services change real ip.
 The origin ip should be available in one of the headers.
 Nginx: X-Forwarded-For

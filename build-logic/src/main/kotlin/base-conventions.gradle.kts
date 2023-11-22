@@ -17,6 +17,12 @@ repositories {
     mavenCentral()
     sonatype.s01Snapshots()
     sonatype.ossSnapshots()
+    maven("https://maven.reposilite.com/snapshots") {
+        mavenContent {
+            snapshotsOnly()
+            includeGroup("io.javalin")
+        }
+    }
 }
 
 extensions.configure(IndraExtension::class) {
