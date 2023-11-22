@@ -2,11 +2,9 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches:
-      - master
+    branches: [ "**" ]
+    tags-ignore: [ "**" ]
   pull_request:
-    branches:
-      - master
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.event.number || github.ref }}"
