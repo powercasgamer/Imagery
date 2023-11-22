@@ -8,7 +8,7 @@ plugins {
     id("net.kyori.indra")
     id("net.kyori.indra.git")
     id("net.kyori.indra.licenser.spotless")
-    id("com.github.johnrengelman.shadow")
+    id("io.github.goooler.shadow")
     id("java-library")
 }
 
