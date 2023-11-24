@@ -5,7 +5,7 @@ import java.util.*
 
 plugins {
     id("base-conventions")
-    id("net.kyori.indra")
+    id("net.kyori.indra.publishing")
     id("net.kyori.indra.git")
     id("net.kyori.indra.licenser.spotless")
     id("io.github.goooler.shadow")
