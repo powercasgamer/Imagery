@@ -53,7 +53,7 @@ import kotlin.io.path.outputStream
 
 private val logger = KotlinLogging.logger {}
 
-class App(private val config: Config, usersConfigOption: String) {
+class App(val config: Config, usersConfigOption: String) {
     private val scheduler = ConcurrencyUtil.executorService("Imagery Scheduler", true)
     private val storageDir = Path(config.storagePath)
     private val dataLoader = JacksonConfigurationLoader.builder()
@@ -78,8 +78,9 @@ class App(private val config: Config, usersConfigOption: String) {
         it.showJavalinBanner = false
         it.router.ignoreTrailingSlashes = true
         it.useVirtualThreads = true
+        it.http.brotliAndGzipCompression()
         it.contextResolver.ip = { ctx ->
-            ctx.header("CF-Connecting-IP") ?: ctx.req().remoteAddr
+            ctx.header(config.addressHeader) ?: ctx.req().remoteAddr
         }
     }
 
@@ -161,12 +162,12 @@ class App(private val config: Config, usersConfigOption: String) {
         logger.info { "Shutting down..." }
     }
 
+    private fun getRandomString(length: Int = config.pathLength): String =
+        generateSequence(ALLOWED_CHARS::random).take(length).joinToString("")
+
     companion object {
         private val MAPPER = jacksonObjectMapper()
         private val ALLOWED_CHARS = ('A'..'Z') + ('a'..'z') + ('0'..'9')
-
-        fun getRandomString(length: Int = 8): String =
-            generateSequence(ALLOWED_CHARS::random).take(length).joinToString("")
     }
 
     data class FileCacheEntry(val file: UploadedFile, val path: Path)

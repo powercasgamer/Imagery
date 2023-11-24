@@ -22,12 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package dev.mizule.imagery.app.exceptions
+package dev.mizule.imagery.app.util
 
-import io.javalin.http.HttpResponseException
-import io.javalin.http.HttpStatus
+import dev.mizule.imagery.app.dependency.classloader.ClassLoaderHelper
+import dev.mizule.imagery.app.dependency.classloader.SystemClassLoaderHelper
+import xyz.jpenilla.gremlin.runtime.ClasspathAppender
+import java.nio.file.Path
 
-class FileNotFoundResponse @JvmOverloads constructor(
-    message: String = "This file does not exist",
-    details: Map<String, String> = mapOf(),
-) : HttpResponseException(HttpStatus.NOT_FOUND, message, details)
+class AppClassPathAppender(parentLoader: ClassLoader = Util::class.java.classLoader) : ClasspathAppender {
+
+    private val classLoaderAccess: ClassLoaderHelper = SystemClassLoaderHelper(parentLoader)
+
+    override fun append(path: Path) {
+        classLoaderAccess.addToClasspath(path)
+    }
+}

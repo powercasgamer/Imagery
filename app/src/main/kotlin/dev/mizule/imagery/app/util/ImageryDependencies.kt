@@ -22,12 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package dev.mizule.imagery.app.exceptions
+package dev.mizule.imagery.app.util
 
-import io.javalin.http.HttpResponseException
-import io.javalin.http.HttpStatus
+import org.slf4j.LoggerFactory
+import xyz.jpenilla.gremlin.runtime.DependencyCache
+import xyz.jpenilla.gremlin.runtime.DependencyResolver
+import xyz.jpenilla.gremlin.runtime.DependencySet
+import java.nio.file.Path
 
-class FileNotFoundResponse @JvmOverloads constructor(
-    message: String = "This file does not exist",
-    details: Map<String, String> = mapOf(),
-) : HttpResponseException(HttpStatus.NOT_FOUND, message, details)
+class ImageryDependencies {
+    companion object {
+        fun resolve(cacheDir: Path): Set<Path> {
+            val deps = DependencySet.readFromClasspathResource(
+                ImageryDependencies::class.java.classLoader,
+                "imagery-dependencies.txt",
+            )
+            val cache = DependencyCache(cacheDir)
+            val logger = LoggerFactory.getLogger(ImageryDependencies::class.java.simpleName)
+            val files: Set<Path>
+            DependencyResolver(logger).use { downloader ->
+                files = downloader.resolve(deps, cache).jarFiles()
+            }
+            cache.cleanup()
+            return files
+        }
+    }
+}

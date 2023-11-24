@@ -2,11 +2,9 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches:
-      - master
+    branches: [ "**" ]
+    tags-ignore: [ "**" ]
   pull_request:
-    branches:
-      - master
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.event.number || github.ref }}"
@@ -59,7 +57,7 @@ jobs:
           fi
 
       - name: Publish
-        if: ${{ runner.os == 'Linux' && env.STATUS != 'release' && github.event_name == 'push' && startsWith(github.ref, 'refs/heads/master/') && false }}
+        if: ${{ runner.os == 'Linux' && env.STATUS != 'release' && github.event_name == 'push' && startsWith(github.ref, 'refs/heads/master/') }}
         run: ./gradlew publish -x requireClean -x signMavenPublication
         env:
           ORG_GRADLE_PROJECT_mizuleUsername: ${{ secrets.MAVEN_USERNAME }}
