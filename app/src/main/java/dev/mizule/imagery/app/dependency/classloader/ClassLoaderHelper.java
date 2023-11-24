@@ -1,5 +1,6 @@
 package dev.mizule.imagery.app.dependency.classloader;
 
+import dev.mizule.imagery.app.App;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -188,7 +189,7 @@ public abstract class ClassLoaderHelper {
         }
 
         // Couldn't init, print errors and throw a RuntimeException
-        Logger logger = LoggerFactory.getLogger("LIBBY STYFF");
+        Logger logger = LoggerFactory.getLogger("Dependency Downloader");
         if (unsafeException != null) {
             logger.error("Cannot set accessible " + methodSignature + " using unsafe", unsafeException);
         }

@@ -160,6 +160,7 @@ class App(val config: Config, usersConfigOption: String) {
 
     fun stop() {
         logger.info { "Shutting down..." }
+        javalin.stop()
     }
 
     private fun getRandomString(length: Int = config.pathLength): String =
