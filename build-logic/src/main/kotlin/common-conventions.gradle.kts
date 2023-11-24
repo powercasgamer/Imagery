@@ -78,19 +78,33 @@ tasks {
         dependsOn(shadowJar)
     }
 
-    shadowJar {
-        archiveClassifier.set("")
-
-        mergeServiceFiles()
-
-        transform(Log4j2PluginsCacheFileTransformer::class.java)
-    }
-
     jar {
+        manifest {
+            attributes.putAll(
+                mapOf(
+                    "Multi-Release" to true
+                )
+            )
+        }
         archiveClassifier.set("unshaded")
         from(rootProject.projectDir.resolve("LICENSE")) {
             rename { "LICENSE_${providers.gradleProperty("projectName").getOrElse("template")}" }
         }
+    }
+
+    shadowJar {
+        archiveClassifier.set("")
+
+        mergeServiceFiles()
+//        manifest.inheritFrom((tasks.jar as Jar).manifest)
+        manifest {
+            attributes.putAll(
+                mapOf(
+                    "Multi-Release" to "true"
+                )
+            )
+        }
+        transform(Log4j2PluginsCacheFileTransformer::class.java)
     }
 
     withType<JavaCompile>().configureEach {
@@ -106,11 +120,11 @@ tasks {
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
     }
 
-     javadoc {
-            val options = options as? StandardJavadocDocletOptions ?: return@javadoc
-            options.isAuthor = true
-            options.encoding = "UTF-8"
-            options.charSet = "UTF-8"
-            options.linkSource(true)
-        }
+    javadoc {
+        val options = options as? StandardJavadocDocletOptions ?: return@javadoc
+        options.isAuthor = true
+        options.encoding = "UTF-8"
+        options.charSet = "UTF-8"
+        options.linkSource(true)
+    }
 }

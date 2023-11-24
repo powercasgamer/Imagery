@@ -28,6 +28,8 @@ package dev.mizule.imagery.app.launcher
 
 import dev.mizule.imagery.app.App
 import dev.mizule.imagery.app.config.Config
+import dev.mizule.imagery.app.util.AppClassPathAppender
+import dev.mizule.imagery.app.util.ImageryDependencies
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.default
@@ -39,11 +41,22 @@ import kotlin.io.path.exists
 
 fun main(args: Array<String>) {
     val parser = ArgParser("imagery")
-    val configPathOption by parser.option(ArgType.String, shortName = "p", description = "The configuration file path, created if not present.")
+    val configPathOption by parser.option(
+        ArgType.String,
+        shortName = "p",
+        description = "The configuration file path, created if not present.",
+    )
         .default("./config.conf")
-    val usersPathOption by parser.option(ArgType.String, shortName = "u", description = "The user configuration file path, created if not present.")
+    val usersPathOption by parser.option(
+        ArgType.String,
+        shortName = "u",
+        description = "The user configuration file path, created if not present.",
+    )
         .default("./users.json")
     parser.parse(args)
+
+    // load dependencies
+    downloadDependencies()
 
     val configPath = Path(configPathOption)
     val configLoader = HoconConfigurationLoader.builder()
@@ -70,4 +83,8 @@ fun main(args: Array<String>) {
     Runtime.getRuntime().addShutdownHook(Thread(app::stop))
 
     app.start()
+}
+
+fun downloadDependencies() {
+    AppClassPathAppender().append(ImageryDependencies.resolve(Path("libraries")))
 }

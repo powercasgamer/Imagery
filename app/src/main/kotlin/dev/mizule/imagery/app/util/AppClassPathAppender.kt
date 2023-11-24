@@ -24,27 +24,16 @@
  */
 package dev.mizule.imagery.app.util
 
-import org.slf4j.LoggerFactory
-import xyz.jpenilla.gremlin.runtime.DependencyCache
-import xyz.jpenilla.gremlin.runtime.DependencyResolver
-import xyz.jpenilla.gremlin.runtime.DependencySet
+import dev.mizule.imagery.app.dependency.classloader.ClassLoaderHelper
+import dev.mizule.imagery.app.dependency.classloader.SystemClassLoaderHelper
+import xyz.jpenilla.gremlin.runtime.ClasspathAppender
 import java.nio.file.Path
 
-class ImageryDependencies {
-    companion object {
-        fun resolve(cacheDir: Path): Set<Path> {
-            val deps = DependencySet.readFromClasspathResource(
-                ImageryDependencies::class.java.classLoader,
-                "imagery-dependencies.txt",
-            )
-            val cache = DependencyCache(cacheDir)
-            val logger = LoggerFactory.getLogger(ImageryDependencies::class.java.simpleName)
-            val files: Set<Path>
-            DependencyResolver(logger).use { downloader ->
-                files = downloader.resolve(deps, cache).jarFiles()
-            }
-            cache.cleanup()
-            return files
-        }
+class AppClassPathAppender(parentLoader: ClassLoader = Util::class.java.classLoader) : ClasspathAppender {
+
+    private val classLoaderAccess: ClassLoaderHelper = SystemClassLoaderHelper(parentLoader)
+
+    override fun append(path: Path) {
+        classLoaderAccess.addToClasspath(path)
     }
 }
