@@ -64,7 +64,7 @@ jobs:
           echo ${{ github.event_name }}
 
       - name: Publish
-        if: ${{ runner.os == 'Linux' && env.STATUS != 'release' && github.event_name == 'push' && startsWith(github.ref, 'refs/heads/master/') }}
+        if: ${{ runner.os == 'Linux' && env.STATUS != 'release' && github.event_name == 'push' && startsWith(github.ref, 'refs/heads/master') }}
         run: ./gradlew publish -x requireClean -x signMavenPublication
         env:
           ORG_GRADLE_PROJECT_mizuleUsername: ${{ secrets.MAVEN_USERNAME }}
