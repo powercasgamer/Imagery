@@ -58,6 +58,8 @@ jobs:
           echo $GITHUB_ENV
           echo $env.STATUS
           cat $GITHUB_ENV
+          echo ${{ runner.os }}
+          echo ${{ runner }}
 
       - name: Publish
         if: ${{ runner.os == 'Linux' && env.STATUS != 'release' && github.event_name == 'push' && startsWith(github.ref, 'refs/heads/master/') }}
