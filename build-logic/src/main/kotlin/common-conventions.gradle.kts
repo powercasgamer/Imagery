@@ -15,7 +15,7 @@ plugins {
 
 //val libs = extensions.getByType(org.gradle.accessors.dm.LibrariesForLibs::class)
 
-//extensions.getByType(BasePluginExtension::class.java).archivesName.set(project.nameString())
+extensions.getByType(BasePluginExtension::class.java).archivesName.set(project.nameString(true))
 
 indra {
     javaVersions {
@@ -80,13 +80,6 @@ tasks {
     }
 
     jar {
-        manifest {
-            attributes.putAll(
-                mapOf(
-                    "Multi-Release" to true
-                )
-            )
-        }
         archiveClassifier.set("unshaded")
         from(rootProject.projectDir.resolve("LICENSE")) {
             rename { "LICENSE_${providers.gradleProperty("projectName").getOrElse("template")}" }
@@ -95,16 +88,7 @@ tasks {
 
     shadowJar {
         archiveClassifier.set("")
-
         mergeServiceFiles()
-//        manifest.inheritFrom((tasks.jar as Jar).manifest)
-        manifest {
-            attributes.putAll(
-                mapOf(
-                    "Multi-Release" to "true"
-                )
-            )
-        }
         transform(Log4j2PluginsCacheFileTransformer::class.java)
     }
 

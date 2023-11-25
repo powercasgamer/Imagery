@@ -42,6 +42,8 @@ dependencies {
     runtimeDownloadOnlyApi("com.aayushatharva.brotli4j:native-linux-x86_64:1.13.0")
 }
 
+applyJarMetadata("imagery-app")
+
 application {
     mainClass.set("dev.mizule.imagery.app.launcher.Launcher")
 }

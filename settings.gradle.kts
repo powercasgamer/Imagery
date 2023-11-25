@@ -9,4 +9,10 @@ plugins {
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 rootProject.name = "Imagery"
-include("app")
+
+sequenceOf(
+    "app",
+).forEach {
+    include("imagery-$it")
+    project(":imagery-$it").projectDir = file(it)
+}
