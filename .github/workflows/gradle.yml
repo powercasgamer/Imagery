@@ -56,7 +56,8 @@ jobs:
             echo "STATUS=release" >> $GITHUB_ENV
           fi
           echo $GITHUB_ENV
-          echo $env.STATUs
+          echo $env.STATUS
+          cat $GITHUB_ENV
 
       - name: Publish
         if: ${{ runner.os == 'Linux' && env.STATUS != 'release' && github.event_name == 'push' && startsWith(github.ref, 'refs/heads/master/') }}
