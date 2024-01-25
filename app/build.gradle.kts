@@ -33,7 +33,7 @@ dependencies {
     runtimeDownloadOnlyApi("org.spongepowered:configurate-hocon:4.2.0-SNAPSHOT")
     implementation(libs.gremlin.runtime)
     runtimeDownloadOnlyApi("org.spongepowered:configurate-extra-kotlin:4.2.0-SNAPSHOT")
-    runtimeDownloadOnlyApi("com.aayushatharva.brotli4j:brotli4j:1.13.0")
+    runtimeDownloadOnlyApi("com.aayushatharva.brotli4j:brotli4j:1.16.0")
     runtimeDownloadOnlyApi("com.aayushatharva.brotli4j:native-windows-x86_64:1.13.0")
     runtimeDownloadOnlyApi("com.aayushatharva.brotli4j:native-osx-aarch64:1.13.0")
     runtimeDownloadOnlyApi("com.aayushatharva.brotli4j:native-osx-x86_64:1.13.0")
