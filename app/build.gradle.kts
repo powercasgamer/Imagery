@@ -39,7 +39,7 @@ dependencies {
     runtimeDownloadOnlyApi("com.aayushatharva.brotli4j:native-osx-x86_64:1.13.0")
     runtimeDownloadOnlyApi("com.aayushatharva.brotli4j:native-linux-armv7:1.13.0")
     runtimeDownloadOnlyApi("com.aayushatharva.brotli4j:native-linux-aarch64:1.13.0")
-    runtimeDownloadOnlyApi("com.aayushatharva.brotli4j:native-linux-x86_64:1.13.0")
+    runtimeDownloadOnlyApi("com.aayushatharva.brotli4j:native-linux-x86_64:1.16.0")
 }
 
 applyJarMetadata("imagery-app")
