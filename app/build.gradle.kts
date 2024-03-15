@@ -23,10 +23,10 @@ val operatingSystem: OperatingSystem = DefaultNativePlatform.getCurrentOperating
 dependencies {
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
-    implementation("io.github.oshai:kotlin-logging-jvm:5.1.1")
+    implementation("io.github.oshai:kotlin-logging-jvm:5.1.4")
     implementation("org.jetbrains.kotlinx:kotlinx-cli-jvm:0.3.6")
     runtimeDownloadOnlyApi("com.fasterxml.jackson.module:jackson-module-kotlin:2.16.0")
-    implementation("org.slf4j:slf4j-simple:2.0.9")
+    implementation("org.slf4j:slf4j-simple:2.0.12")
     runtimeDownloadOnlyApi("io.javalin:javalin:6.0.0-SNAPSHOT")
     runtimeDownloadOnlyApi("com.github.ben-manes.caffeine:caffeine:3.1.8")
     runtimeDownloadOnlyApi("org.spongepowered:configurate-jackson:4.2.0-SNAPSHOT")
