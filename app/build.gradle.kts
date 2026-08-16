@@ -25,7 +25,7 @@ dependencies {
     implementation(kotlin("reflect"))
     implementation("io.github.oshai:kotlin-logging-jvm:5.1.1")
     implementation("org.jetbrains.kotlinx:kotlinx-cli-jvm:0.3.6")
-    runtimeDownloadOnlyApi("com.fasterxml.jackson.module:jackson-module-kotlin:2.16.0")
+    runtimeDownloadOnlyApi("com.fasterxml.jackson.module:jackson-module-kotlin:2.22.2")
     implementation("org.slf4j:slf4j-simple:2.0.9")
     runtimeDownloadOnlyApi("io.javalin:javalin:6.0.0-SNAPSHOT")
     runtimeDownloadOnlyApi("com.github.ben-manes.caffeine:caffeine:3.1.8")
